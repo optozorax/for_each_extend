@@ -3,6 +3,12 @@ pub struct ForEachExtend<'a, T> {
 	pos: usize,
 }
 
+impl<'a, T> Extend<T> for ForEachExtend<'a, T> {
+	fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+		self.vec.extend(iter);
+	}
+}
+
 impl<'a, T> ForEachExtend<'a, T> {
 	pub fn push(&mut self, t: T) {
 		self.vec.push(t);
