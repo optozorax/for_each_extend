@@ -13,5 +13,5 @@ a.for_each_extend(|x| {
 	}
 });
 
-assert_eq!(a, vec![1, 2, 3, 4, 5, 6, 7, 8]);
+assert_eq!(a, [1, 2, 3, 4, 5, 6, 7, 8]);
 ```

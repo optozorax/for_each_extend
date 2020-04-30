@@ -21,20 +21,21 @@ impl<'a, T> ForEachExtend<'a, T> {
 	}
 }
 
-pub trait ForEachExtendTrait<'a, T: 'a> {
-	fn for_each_extend<F: FnMut(&mut ForEachExtend<'a, T>)>(&'a mut self, f: F);
+pub trait ForEachExtendTrait<T> {
+	fn for_each_extend<F: for<'a> FnMut(&mut ForEachExtend<'a, T>)>(&mut self, f: F) -> &mut Self;
 }
 
-impl<'a, T: 'a> ForEachExtendTrait<'a, T> for Vec<T> {
-	fn for_each_extend<F: FnMut(&mut ForEachExtend<'a, T>)>(&'a mut self, mut f: F) {
+impl<T> ForEachExtendTrait<T> for Vec<T> {
+	fn for_each_extend<F: for<'a> FnMut(&mut ForEachExtend<'a, T>)>(&mut self, mut f: F) -> &mut Self {
 		let mut for_each_extend = ForEachExtend {
 			vec: self,
-			pos: 0
+			pos: 0,
 		};
 		while for_each_extend.pos < for_each_extend.vec.len() {
 			f(&mut for_each_extend);
 			for_each_extend.pos += 1;
 		}
+		self
 	}
 }
 
@@ -45,13 +46,13 @@ mod tests {
 	#[test]
 	fn empty() {
 		let mut a: Vec<i32> = Vec::new();
-		let mut is_runned = false;
+		let mut is_lambda_called = false;
 		a.for_each_extend(|_| {
-			is_runned = true;
+			is_lambda_called = true;
 		});
 
-		assert!(!is_runned);
-		assert_eq!(a, vec![]);
+		assert!(!is_lambda_called);
+		assert_eq!(a, []);
 	}
 
 	#[test]
@@ -66,7 +67,7 @@ mod tests {
 			}
 		});
 
-		assert_eq!(a, vec![1, 2, 3, 4, 5, 6, 7, 8]);
+		assert_eq!(a, [1, 2, 3, 4, 5, 6, 7, 8]);
 	}
 
 	#[test]
@@ -77,8 +78,9 @@ mod tests {
 				x.push(x.current() + 1);
 				*x.current_mut() = 10 * x.index();
 			}
-		});
+		}).iter_mut()
+			.for_each(|x| *x += 1);
 
-		assert_eq!(a, vec![1, 2, 20, 4, 5, 50, 4, 7]);
+		assert_eq!(a, [2, 3, 21, 5, 6, 51, 5, 8]);
 	}
 }
